@@ -164,9 +164,14 @@ def record_powercontext_usage(settings) -> Path:
     lines.append("## 读回的原子记忆")
     lines.append("")
     if hits:
+        unique: dict[str, int] = {}
         for hit in hits:
             memory = hit.get("memory", {})
-            lines.append(f"- `{memory.get('kind', '')}` — {memory.get('text', '')}")
+            text = f"`{memory.get('kind', '')}` — {memory.get('text', '')}"
+            unique[text] = unique.get(text, 0) + 1
+        for text, count in unique.items():
+            suffix = f"（{count} 次运行各写入一条）" if count > 1 else ""
+            lines.append(f"- {text}{suffix}")
     else:
         lines.append("- （无）")
     lines.append("")

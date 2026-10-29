@@ -1,25 +1,25 @@
 seekDB query record
 ==============================================================================
-database directory: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.sddctx-run\seekdb
+database directory: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.sddctx-v4\seekdb
 
 -- import run history ------------------------------------------
-{"run_id": "52739d1b1b4aaebf", "started_at": "2026-10-29T18:51:11+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
-{"run_id": "15ac4af471eb6120", "started_at": "2026-10-29T18:51:06+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
-{"run_id": "895e553ec1d1ba15", "started_at": "2026-10-29T18:50:39+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "7347ade3619b748b", "started_at": "2026-10-29T18:58:08+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "55b6fa1415ec5dee", "started_at": "2026-10-29T18:58:02+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "4ea6a6d7db852b91", "started_at": "2026-10-29T18:57:36+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
 
 -- stored specifications ---------------------------------------
-SPEC-FILTER-001 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-001.md:1 | hash=e35a4970054ff634
-SPEC-FILTER-002 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-002.md:1 | hash=e32d06c48abd670e
-SPEC-FILTER-003 v3 | scope=src/shop/filters.py | source=SPEC-FILTER-003.md:1 | hash=9bb4dd9396e2611f
-SPEC-PRICE-010 v1 | scope=src/shop/pricing.py | source=SPEC-PRICE-010.md:1 | hash=e25b0187b01e09d4
+SPEC-FILTER-001 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-001.md:1 | hash=a606f905dab49858
+SPEC-FILTER-002 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-002.md:1 | hash=410766859b513f21
+SPEC-FILTER-003 v3 | scope=src/shop/filters.py | source=SPEC-FILTER-003.md:1 | hash=af126e2bc25a1c97
+SPEC-PRICE-010 v1 | scope=src/shop/pricing.py | source=SPEC-PRICE-010.md:1 | hash=6b0cb35f12a5050e
 
 -- revision history of the specifications ------------------------
-SPEC-FILTER-001 v1 captured=2026-10-29T18:50:39+00:00
-SPEC-FILTER-002 v1 captured=2026-10-29T18:50:39+00:00
-SPEC-FILTER-003 v1 captured=2026-10-29T18:50:39+00:00
-SPEC-FILTER-003 v2 captured=2026-10-29T18:51:06+00:00
-SPEC-FILTER-003 v3 captured=2026-10-29T18:51:11+00:00
-SPEC-PRICE-010 v1 captured=2026-10-29T18:50:39+00:00
+SPEC-FILTER-001 v1 captured=2026-10-29T18:57:36+00:00
+SPEC-FILTER-002 v1 captured=2026-10-29T18:57:36+00:00
+SPEC-FILTER-003 v1 captured=2026-10-29T18:57:36+00:00
+SPEC-FILTER-003 v2 captured=2026-10-29T18:58:02+00:00
+SPEC-FILTER-003 v3 captured=2026-10-29T18:58:08+00:00
+SPEC-PRICE-010 v1 captured=2026-10-29T18:57:36+00:00
 
 -- retrieval: full text match on the indexed specification text ---
 SQL   : SELECT spec_id, MATCH(search_text) AGAINST ('+customer_tiers +premium +gold +silver' IN BOOLEAN MODE)

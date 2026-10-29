@@ -13,7 +13,16 @@
       "matched_by": [
         "fulltext"
       ],
-      "requirement": "`filter_orders` 的 `customer_tiers` 过滤必须同时支持具体等级和等级分组。\n\n具体等级直接按 `Order.customer_tier` 精确匹配。等级分组是等级集合的别名，在过滤前先展开为具体等级集合：\n\n| 分组 | 展开为 |\n| --- | --- |\n| `premium` | `gold`、`silver` |\n\n传入的具体等级与分组可以混合使用。只要订单的 `customer_tier` 命中展开后的任一等级，该订单即被保留。\n\n当 `customer_tiers` 为空集合时，不按客户等级过滤。"
+      "requirement": "`filter_orders` 的 `customer_tiers` 过滤必须同时支持具体等级和等级分组。\n\n具体等级直接按 `Order.customer_tier` 精确匹配。等级分组是等级集合的别名，在过滤前先展开为具体等级集合：\n\n| 分组 | 展开为 |\n| --- | --- |\n| `premium` | `gold`、`silver` |\n\n传入的具体等级与分组可以混合使用。只要订单的 `customer_tier` 命中展开后的任一等级，该订单即被保留。\n\n当 `customer_tiers` 为空集合时，不按客户等级过滤。",
+      "acceptance": [
+        "`OrderCriteria(customer_tiers=frozenset({\"premium\"}))` 返回 `customer_tier` 为 `gold` 或 `silver` 的全部订单。",
+        "`OrderCriteria(customer_tiers=frozenset({\"gold\"}))` 仍然只返回 `customer_tier == \"gold\"` 的订单。",
+        "`OrderCriteria(customer_tiers=frozenset({\"premium\", \"bronze\"}))` 返回 `gold`、`silver`、`bronze` 三种等级的订单。",
+        "空 `customer_tiers` 返回全部订单。"
+      ],
+      "invariants": [
+        "`SPEC-FILTER-001` 的状态过滤、`SPEC-FILTER-002` 的金额下限过滤，以及过滤结果相对输入的顺序， 在本次任务中必须保持不变。"
+      ]
     },
     {
       "spec_id": "SPEC-FILTER-001",
@@ -27,7 +36,15 @@
       "matched_by": [
         "phrase:中的"
       ],
-      "requirement": "`filter_orders` 必须支持按 `status` 过滤订单。传入的 `OrderCriteria.status` 集合中的状态才会被保留；\n当 `status` 为空集合时，不按状态过滤。"
+      "requirement": "`filter_orders` 必须支持按 `status` 过滤订单。传入的 `OrderCriteria.status` 集合中的状态才会被保留；\n当 `status` 为空集合时，不按状态过滤。",
+      "acceptance": [
+        "`OrderCriteria(status=frozenset({\"paid\"}))` 只返回 `status == \"paid\"` 的订单。",
+        "空 `status` 集合返回全部订单。",
+        "过滤不改变输入列表的顺序，也不修改输入对象。"
+      ],
+      "invariants": [
+        "订单状态取值集合、订单排序规则与 `Order` 数据结构在本次任务中保持不变。"
+      ]
     }
   ],
   "code": [
@@ -179,7 +196,7 @@
       }
     ],
     "artifacts": [],
-    "updated_at": "2026-10-29T18:50:40+00:00",
+    "updated_at": "2026-10-29T18:57:36+00:00",
     "source_ids": {
       "contract": "sddctx-contract:task-filter-003",
       "outcome": "sddctx-outcome:task-filter-003"

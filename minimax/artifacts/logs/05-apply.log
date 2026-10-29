@@ -2,6 +2,6 @@ $ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspac
 # cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
 # exit code: 0
 
-Task state written to PowerContext scope scp_1x1gtygc2phnst7463w0h0pmnx
 Changed files: src/shop/filters.py
 pytest -q tests/test_filters_tier_groups.py -> exit 0
+warning: the task state could not be written: PowerContext POST /v1/work/contracts/create failed with HTTP 409: {"error":{"code":"source_conflict","message":"The Source identity has different content.","details":null}}

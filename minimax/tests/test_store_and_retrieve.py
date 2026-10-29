@@ -143,6 +143,14 @@ def test_import_stores_the_material(store, project) -> None:
     assert specs["SPEC-FILTER-003"]["source_file"].endswith("SPEC-FILTER-003.md")
 
 
+def test_import_stores_the_acceptance_criteria_and_the_invariants(store, project) -> None:
+    import_materials(store, specs_dir=project / "specs", project_dir=project / "demo")
+    spec = store.spec_by_id("SPEC-FILTER-003")
+    assert spec is not None
+    assert spec["acceptance"]
+    assert spec["invariants"]
+
+
 def test_retrieval_selects_the_specification_of_the_task(store, project) -> None:
     import_materials(store, specs_dir=project / "specs", project_dir=project / "demo")
     selected = select_specs(store, "为 customer_tiers 增加 premium 分组展开")

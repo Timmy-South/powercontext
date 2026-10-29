@@ -53,10 +53,10 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Orde
         result = [order for order in result if order.status in criteria.status]
     if criteria.min_amount is not None:
         result = [order for order in result if order.amount >= criteria.min_amount]
-    if criteria.customer_tiers:
-        customer_tiers = set(criteria.customer_tiers)
-        if "premium" in customer_tiers:
-            customer_tiers.remove("premium")
-            customer_tiers.update(("gold", "silver"))
+    customer_tiers = set(criteria.customer_tiers)
+    if "premium" in customer_tiers:
+        customer_tiers.remove("premium")
+        customer_tiers.update(("gold", "silver"))
+    if customer_tiers:
         result = [order for order in result if order.customer_tier in customer_tiers]
     return result

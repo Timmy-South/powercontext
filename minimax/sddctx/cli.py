@@ -88,12 +88,22 @@ def command_import(settings: Settings, args: argparse.Namespace) -> int:
     Returns:
         Process exit code.
     """
+    specs_dir = Path(args.specs) if args.specs else settings.specs_dir
+    project_dir = Path(args.project) if args.project else settings.project_dir
+    for label, directory in (("specification directory", specs_dir), ("business project", project_dir)):
+        if not directory.is_dir():
+            print(f"error: the {label} does not exist: {directory}", file=sys.stderr)
+            print(
+                "set SDDCTX_ROOT to the directory that holds specs/ and demo_shop/, or pass --specs and --project",
+                file=sys.stderr,
+            )
+            return 7
+
     with SeekDBStore(settings.db_dir) as store:
-        summary = import_materials(
-            store,
-            specs_dir=Path(args.specs) if args.specs else settings.specs_dir,
-            project_dir=Path(args.project) if args.project else settings.project_dir,
-        )
+        summary = import_materials(store, specs_dir=specs_dir, project_dir=project_dir)
+    if not summary["spec_count"]:
+        print(f"error: no specification was found in {specs_dir}", file=sys.stderr)
+        return 8
     _print(summary)
     return 0
 
@@ -159,6 +169,13 @@ def command_context(settings: Settings, args: argparse.Namespace) -> int:
                 print(f"  remaining: {item}")
             for check in context.state.get("checks", []):
                 print(f"  check: {check}")
+    if not context.specs:
+        print("error: no specification matched the task", file=sys.stderr)
+        print(
+            "run 'python -m sddctx import' and check that the task names the identifiers of the specification",
+            file=sys.stderr,
+        )
+        return 2
     return 0
 
 

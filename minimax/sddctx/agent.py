@@ -166,6 +166,20 @@ class TaskResult:
         }
 
 
+def _bullets(items: list[str]) -> str:
+    """Render a list of lines as a Markdown list.
+
+    Args:
+        items: Lines to render.
+
+    Returns:
+        The rendered list, or a placeholder when it is empty.
+    """
+    if not items:
+        return "(none)"
+    return "\n".join(f"- {item}" for item in items)
+
+
 def format_prompt(context: TaskContext) -> str:
     """Render the assembled context into the prompt of the model.
 
@@ -179,7 +193,9 @@ def format_prompt(context: TaskContext) -> str:
         "\n".join(
             f"[{spec.spec_id}] (version {spec.version}) {spec.title}\n"
             f"Source: {spec.source_file}:{spec.line_start}-{spec.line_end}\n"
-            f"Requirement:\n{spec.body}"
+            f"Requirement:\n{spec.body}\n"
+            f"Acceptance criteria:\n{_bullets(spec.acceptance)}\n"
+            f"Behaviour that must stay unchanged:\n{_bullets(spec.invariants)}"
             for spec in context.specs
         )
         or "(none matched)"
@@ -296,8 +312,9 @@ def build_state(
         scope_id=scope_id,
         facts=[f"{spec.spec_id} applies to {spec.scope}" for spec in context.specs],
         in_scope=sorted({spec.scope for spec in context.specs if spec.scope}),
-        exclusions=[f"{spec.spec_id} keeps {spec.title} unchanged" for spec in context.specs],
+        exclusions=[f"{spec.spec_id}: {invariant}" for spec in context.specs for invariant in spec.invariants],
         completion_criteria=[
+            *[f"{spec.spec_id}: {criterion}" for spec in context.specs for criterion in spec.acceptance],
             "The target tests of the specification pass.",
             "The regression tests of the project still pass.",
         ],

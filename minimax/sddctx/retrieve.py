@@ -73,6 +73,8 @@ class SelectedSpec:
         spec_id: Identifier of the specification.
         title: Title of the specification.
         body: Requirement text of the specification.
+        acceptance: Acceptance criteria of the specification.
+        invariants: Behaviour that must survive the change.
         scope: Source path the specification applies to.
         version: Revision number of the specification.
         source_file: File the specification was parsed from.
@@ -85,6 +87,8 @@ class SelectedSpec:
     spec_id: str
     title: str
     body: str
+    acceptance: list[str]
+    invariants: list[str]
     scope: str
     version: int
     source_file: str
@@ -134,6 +138,8 @@ class TaskContext:
                     "score": round(spec.score, 6),
                     "matched_by": spec.matched_by,
                     "requirement": spec.body,
+                    "acceptance": list(spec.acceptance),
+                    "invariants": list(spec.invariants),
                 }
                 for spec in self.specs
             ],
@@ -142,6 +148,18 @@ class TaskContext:
             "tests": self.tests,
             "state": self.state,
         }
+
+
+def _split_lines(text: str) -> list[str]:
+    """Split stored text into its non empty lines.
+
+    Args:
+        text: Stored text.
+
+    Returns:
+        The lines of the text.
+    """
+    return [line.strip() for line in text.splitlines() if line.strip()]
 
 
 def extract_query_terms(task: str) -> tuple[list[str], list[str]]:
@@ -225,6 +243,8 @@ def select_specs(store: SeekDBStore, task: str, limit: int = 5) -> list[Selected
                 spec_id=record["spec_id"],
                 title=record["title"],
                 body=record["body"],
+                acceptance=_split_lines(record.get("acceptance", "")),
+                invariants=_split_lines(record.get("invariants", "")),
                 scope=record["scope"],
                 version=int(record["version"]),
                 source_file=record["source_file"],

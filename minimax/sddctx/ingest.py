@@ -84,6 +84,24 @@ class ParsedSpec:
         """Return the requirement text of the specification."""
         return self.requirement
 
+    def content(self) -> str:
+        """Return the full content of the specification.
+
+        The requirement, the acceptance criteria and the behaviour that has to
+        survive the change together form the content of a specification, so a
+        change in any of them is a change of the specification.
+
+        Returns:
+            The content of the specification.
+        """
+        return "\n".join(
+            [
+                self.requirement,
+                *self.acceptance,
+                *self.invariants,
+            ]
+        )
+
 
 def _section_key(title: str) -> str:
     """Normalise a section heading into a lookup key.
@@ -146,9 +164,27 @@ def parse_spec_file(path: Path) -> ParsedSpec | None:
             collected.append(text[2:].strip() if text.startswith("- ") else text)
         return collected
 
+    def paragraphs(key: str) -> list[str]:
+        collected: list[str] = []
+        current: list[str] = []
+        for line in sections.get(key, []):
+            text = line.strip()
+            if not text:
+                continue
+            if text.startswith("- "):
+                if current:
+                    collected.append(" ".join(current))
+                    current = []
+                collected.append(text[2:].strip())
+                continue
+            current.append(text)
+        if current:
+            collected.append(" ".join(current))
+        return collected
+
     requirement = joined("需求")
     acceptance = items("验收")
-    invariants = items("保持不变")
+    invariants = paragraphs("保持不变")
 
     scopes: list[str] = []
     for line in sections.get("适用范围", []):
@@ -296,7 +332,7 @@ def import_materials(
     root = specs_dir.parent
     changed: list[str] = []
     for spec in specs:
-        content_hash = hashlib.sha256(spec.requirement.encode("utf-8")).hexdigest()
+        content_hash = hashlib.sha256(spec.content().encode("utf-8")).hexdigest()
         existing = store.spec_by_id(spec.spec_id)
         version = 1
         if existing is not None:
@@ -311,6 +347,8 @@ def import_materials(
             title=spec.title,
             body=spec.requirement,
             search_text=build_search_text(spec),
+            acceptance="\n".join(spec.acceptance),
+            invariants="\n".join(spec.invariants),
             scope=spec.scopes[0] if spec.scopes else "",
             version=version,
             source_file=source_file,

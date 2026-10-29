@@ -78,6 +78,20 @@ def test_parse_spec_file_reads_every_section(tmp_path) -> None:
     assert spec.line_start == 1
 
 
+def test_parse_spec_file_keeps_a_wrapped_invariant_as_one_item(tmp_path) -> None:
+    text = SPEC_TEXT.replace(
+        "`SPEC-FILTER-001` 的状态过滤必须保持不变。",
+        "`SPEC-FILTER-001` 的状态过滤、以及过滤结果相对输入的顺序，\n在本次任务中必须保持不变。",
+    )
+    path = tmp_path / "SPEC-FILTER-003.md"
+    path.write_text(text, encoding="utf-8")
+    spec = parse_spec_file(path)
+    assert spec is not None
+    assert len(spec.invariants) == 1
+    assert "顺序" in spec.invariants[0]
+    assert "必须保持不变" in spec.invariants[0]
+
+
 def test_parse_spec_file_ignores_a_document_without_an_identifier(tmp_path) -> None:
     path = tmp_path / "README.md"
     path.write_text("# Notes\n\nsome text\n", encoding="utf-8")

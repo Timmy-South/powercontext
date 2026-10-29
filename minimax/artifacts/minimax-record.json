@@ -15,7 +15,16 @@
         "matched_by": [
           "fulltext"
         ],
-        "requirement": "`filter_orders` 的 `customer_tiers` 过滤必须同时支持具体等级和等级分组。\n\n具体等级直接按 `Order.customer_tier` 精确匹配。等级分组是等级集合的别名，在过滤前先展开为具体等级集合：\n\n| 分组 | 展开为 |\n| --- | --- |\n| `premium` | `gold`、`silver` |\n\n传入的具体等级与分组可以混合使用。只要订单的 `customer_tier` 命中展开后的任一等级，该订单即被保留。\n\n当 `customer_tiers` 为空集合时，不按客户等级过滤。"
+        "requirement": "`filter_orders` 的 `customer_tiers` 过滤必须同时支持具体等级和等级分组。\n\n具体等级直接按 `Order.customer_tier` 精确匹配。等级分组是等级集合的别名，在过滤前先展开为具体等级集合：\n\n| 分组 | 展开为 |\n| --- | --- |\n| `premium` | `gold`、`silver` |\n\n传入的具体等级与分组可以混合使用。只要订单的 `customer_tier` 命中展开后的任一等级，该订单即被保留。\n\n当 `customer_tiers` 为空集合时，不按客户等级过滤。",
+        "acceptance": [
+          "`OrderCriteria(customer_tiers=frozenset({\"premium\"}))` 返回 `customer_tier` 为 `gold` 或 `silver` 的全部订单。",
+          "`OrderCriteria(customer_tiers=frozenset({\"gold\"}))` 仍然只返回 `customer_tier == \"gold\"` 的订单。",
+          "`OrderCriteria(customer_tiers=frozenset({\"premium\", \"bronze\"}))` 返回 `gold`、`silver`、`bronze` 三种等级的订单。",
+          "空 `customer_tiers` 返回全部订单。"
+        ],
+        "invariants": [
+          "`SPEC-FILTER-001` 的状态过滤、`SPEC-FILTER-002` 的金额下限过滤，以及过滤结果相对输入的顺序， 在本次任务中必须保持不变。"
+        ]
       },
       {
         "spec_id": "SPEC-FILTER-001",
@@ -29,7 +38,15 @@
         "matched_by": [
           "phrase:中的"
         ],
-        "requirement": "`filter_orders` 必须支持按 `status` 过滤订单。传入的 `OrderCriteria.status` 集合中的状态才会被保留；\n当 `status` 为空集合时，不按状态过滤。"
+        "requirement": "`filter_orders` 必须支持按 `status` 过滤订单。传入的 `OrderCriteria.status` 集合中的状态才会被保留；\n当 `status` 为空集合时，不按状态过滤。",
+        "acceptance": [
+          "`OrderCriteria(status=frozenset({\"paid\"}))` 只返回 `status == \"paid\"` 的订单。",
+          "空 `status` 集合返回全部订单。",
+          "过滤不改变输入列表的顺序，也不修改输入对象。"
+        ],
+        "invariants": [
+          "订单状态取值集合、订单排序规则与 `Order` 数据结构在本次任务中保持不变。"
+        ]
       }
     ],
     "code": [
@@ -181,7 +198,7 @@
         }
       ],
       "artifacts": [],
-      "updated_at": "2026-10-29T18:50:44+00:00",
+      "updated_at": "2026-10-29T18:57:40+00:00",
       "source_ids": {
         "contract": "sddctx-contract:task-filter-003",
         "outcome": "sddctx-outcome:task-filter-003"
@@ -190,11 +207,11 @@
   },
   "minimax": {
     "model": "MiniMax-M3.1-Flash",
-    "input_tokens": 1743,
-    "output_tokens": 1764,
-    "answer": "```diff\n--- a/src/shop/filters.py\n+++ b/src/shop/filters.py\n@@ -53,6 +53,11 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n         result = [order for order in result if order.status in criteria.status]\n     if criteria.min_amount is not None:\n         result = [order for order in result if order.amount >= criteria.min_amount]\n     if criteria.customer_tiers:\n-        result = [order for order in result if order.customer_tier in criteria.customer_tiers]\n+        customer_tiers = set(criteria.customer_tiers)\n+        if \"premium\" in customer_tiers:\n+            customer_tiers.remove(\"premium\")\n+            customer_tiers.update((\"gold\", \"silver\"))\n+        result = [order for order in result if order.customer_tier in customer_tiers]\n     return result\n```"
+    "input_tokens": 1988,
+    "output_tokens": 1774,
+    "answer": "```diff\ndiff --git a/src/shop/filters.py b/src/shop/filters.py\nindex 3ef03b8..ee4df17 100644\n--- a/src/shop/filters.py\n+++ b/src/shop/filters.py\n@@ -53,6 +53,10 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n         result = [order for order in result if order.status in criteria.status]\n     if criteria.min_amount is not None:\n         result = [order for order in result if order.amount >= criteria.min_amount]\n-    if criteria.customer_tiers:\n-        result = [order for order in result if order.customer_tier in criteria.customer_tiers]\n+    customer_tiers = set(criteria.customer_tiers)\n+    if \"premium\" in customer_tiers:\n+        customer_tiers.remove(\"premium\")\n+        customer_tiers.update((\"gold\", \"silver\"))\n+    if customer_tiers:\n+        result = [order for order in result if order.customer_tier in customer_tiers]\n     return result\n```"
   },
-  "diff": "--- a/src/shop/filters.py\n+++ b/src/shop/filters.py\n@@ -53,6 +53,11 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n         result = [order for order in result if order.status in criteria.status]\n     if criteria.min_amount is not None:\n         result = [order for order in result if order.amount >= criteria.min_amount]\n     if criteria.customer_tiers:\n-        result = [order for order in result if order.customer_tier in criteria.customer_tiers]\n+        customer_tiers = set(criteria.customer_tiers)\n+        if \"premium\" in customer_tiers:\n+            customer_tiers.remove(\"premium\")\n+            customer_tiers.update((\"gold\", \"silver\"))\n+        result = [order for order in result if order.customer_tier in customer_tiers]\n     return result",
+  "diff": "diff --git a/src/shop/filters.py b/src/shop/filters.py\nindex 3ef03b8..ee4df17 100644\n--- a/src/shop/filters.py\n+++ b/src/shop/filters.py\n@@ -53,6 +53,10 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n         result = [order for order in result if order.status in criteria.status]\n     if criteria.min_amount is not None:\n         result = [order for order in result if order.amount >= criteria.min_amount]\n-    if criteria.customer_tiers:\n-        result = [order for order in result if order.customer_tier in criteria.customer_tiers]\n+    customer_tiers = set(criteria.customer_tiers)\n+    if \"premium\" in customer_tiers:\n+        customer_tiers.remove(\"premium\")\n+        customer_tiers.update((\"gold\", \"silver\"))\n+    if customer_tiers:\n+        result = [order for order in result if order.customer_tier in customer_tiers]\n     return result",
   "changed_files": [
     "src/shop/filters.py"
   ],
@@ -202,7 +219,7 @@
     "src/shop/filters.py": "# Copyright (c) 2026 OceanBase.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n# http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\n\"\"\"Order filtering helpers.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections.abc import Iterable\nfrom dataclasses import dataclass, field\nfrom decimal import Decimal\n\nfrom shop.models import Order\n\n\n@dataclass(frozen=True)\nclass OrderCriteria:\n    \"\"\"Filter criteria accepted by :func:`filter_orders`.\n\n    Attributes:\n        status: Keep only orders whose status is in this collection.\n        min_amount: Keep only orders whose amount is greater than or equal to it.\n        customer_tiers: Keep only orders whose customer tier is in this collection.\n    \"\"\"\n\n    status: frozenset[str] = field(default_factory=frozenset)\n    min_amount: Decimal | None = None\n    customer_tiers: frozenset[str] = field(default_factory=frozenset)\n\n\ndef filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n    \"\"\"Return the orders that satisfy every configured criterion.\n\n    Args:\n        orders: Orders to filter.\n        criteria: Criteria that an order must satisfy.\n\n    Returns:\n        Matching orders in their original relative order.\n    \"\"\"\n    result = list(orders)\n    if criteria.status:\n        result = [order for order in result if order.status in criteria.status]\n    if criteria.min_amount is not None:\n        result = [order for order in result if order.amount >= criteria.min_amount]\n    if criteria.customer_tiers:\n        result = [order for order in result if order.customer_tier in criteria.customer_tiers]\n    return result\n"
   },
   "after": {
-    "src/shop/filters.py": "# Copyright (c) 2026 OceanBase.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n# http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\n\"\"\"Order filtering helpers.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections.abc import Iterable\nfrom dataclasses import dataclass, field\nfrom decimal import Decimal\n\nfrom shop.models import Order\n\n\n@dataclass(frozen=True)\nclass OrderCriteria:\n    \"\"\"Filter criteria accepted by :func:`filter_orders`.\n\n    Attributes:\n        status: Keep only orders whose status is in this collection.\n        min_amount: Keep only orders whose amount is greater than or equal to it.\n        customer_tiers: Keep only orders whose customer tier is in this collection.\n    \"\"\"\n\n    status: frozenset[str] = field(default_factory=frozenset)\n    min_amount: Decimal | None = None\n    customer_tiers: frozenset[str] = field(default_factory=frozenset)\n\n\ndef filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n    \"\"\"Return the orders that satisfy every configured criterion.\n\n    Args:\n        orders: Orders to filter.\n        criteria: Criteria that an order must satisfy.\n\n    Returns:\n        Matching orders in their original relative order.\n    \"\"\"\n    result = list(orders)\n    if criteria.status:\n        result = [order for order in result if order.status in criteria.status]\n    if criteria.min_amount is not None:\n        result = [order for order in result if order.amount >= criteria.min_amount]\n    if criteria.customer_tiers:\n        customer_tiers = set(criteria.customer_tiers)\n        if \"premium\" in customer_tiers:\n            customer_tiers.remove(\"premium\")\n            customer_tiers.update((\"gold\", \"silver\"))\n        result = [order for order in result if order.customer_tier in customer_tiers]\n    return result\n"
+    "src/shop/filters.py": "# Copyright (c) 2026 OceanBase.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n# http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\n\"\"\"Order filtering helpers.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections.abc import Iterable\nfrom dataclasses import dataclass, field\nfrom decimal import Decimal\n\nfrom shop.models import Order\n\n\n@dataclass(frozen=True)\nclass OrderCriteria:\n    \"\"\"Filter criteria accepted by :func:`filter_orders`.\n\n    Attributes:\n        status: Keep only orders whose status is in this collection.\n        min_amount: Keep only orders whose amount is greater than or equal to it.\n        customer_tiers: Keep only orders whose customer tier is in this collection.\n    \"\"\"\n\n    status: frozenset[str] = field(default_factory=frozenset)\n    min_amount: Decimal | None = None\n    customer_tiers: frozenset[str] = field(default_factory=frozenset)\n\n\ndef filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:\n    \"\"\"Return the orders that satisfy every configured criterion.\n\n    Args:\n        orders: Orders to filter.\n        criteria: Criteria that an order must satisfy.\n\n    Returns:\n        Matching orders in their original relative order.\n    \"\"\"\n    result = list(orders)\n    if criteria.status:\n        result = [order for order in result if order.status in criteria.status]\n    if criteria.min_amount is not None:\n        result = [order for order in result if order.amount >= criteria.min_amount]\n    customer_tiers = set(criteria.customer_tiers)\n    if \"premium\" in customer_tiers:\n        customer_tiers.remove(\"premium\")\n        customer_tiers.update((\"gold\", \"silver\"))\n    if customer_tiers:\n        result = [order for order in result if order.customer_tier in customer_tiers]\n    return result\n"
   },
   "test_runs": [
     {
@@ -214,7 +231,7 @@
         "tests/test_filters_tier_groups.py"
       ],
       "exit_code": 0,
-      "duration_seconds": 0.575,
+      "duration_seconds": 0.592,
       "stdout": "....                                                                     [100%]\n4 passed in 0.01s\n"
     }
   ],
@@ -230,10 +247,17 @@
       "src/shop/filters.py"
     ],
     "exclusions": [
-      "SPEC-FILTER-003 keeps 客户等级分组筛选 unchanged",
-      "SPEC-FILTER-001 keeps 订单状态筛选 unchanged"
+      "SPEC-FILTER-003: `SPEC-FILTER-001` 的状态过滤、`SPEC-FILTER-002` 的金额下限过滤，以及过滤结果相对输入的顺序， 在本次任务中必须保持不变。",
+      "SPEC-FILTER-001: 订单状态取值集合、订单排序规则与 `Order` 数据结构在本次任务中保持不变。"
     ],
     "completion_criteria": [
+      "SPEC-FILTER-003: `OrderCriteria(customer_tiers=frozenset({\"premium\"}))` 返回 `customer_tier` 为 `gold` 或 `silver` 的全部订单。",
+      "SPEC-FILTER-003: `OrderCriteria(customer_tiers=frozenset({\"gold\"}))` 仍然只返回 `customer_tier == \"gold\"` 的订单。",
+      "SPEC-FILTER-003: `OrderCriteria(customer_tiers=frozenset({\"premium\", \"bronze\"}))` 返回 `gold`、`silver`、`bronze` 三种等级的订单。",
+      "SPEC-FILTER-003: 空 `customer_tiers` 返回全部订单。",
+      "SPEC-FILTER-001: `OrderCriteria(status=frozenset({\"paid\"}))` 只返回 `status == \"paid\"` 的订单。",
+      "SPEC-FILTER-001: 空 `status` 集合返回全部订单。",
+      "SPEC-FILTER-001: 过滤不改变输入列表的顺序，也不修改输入对象。",
       "The target tests of the specification pass.",
       "The regression tests of the project still pass."
     ],
@@ -253,11 +277,8 @@
     "artifacts": [
       "src/shop/filters.py"
     ],
-    "updated_at": "2026-10-29T18:50:58+00:00",
-    "source_ids": {
-      "contract": "sddctx-contract:task-filter-003",
-      "outcome": "sddctx-outcome:task-filter-003"
-    }
+    "updated_at": "2026-10-29T18:57:55+00:00",
+    "source_ids": {}
   },
   "artifacts": []
 }

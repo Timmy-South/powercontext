@@ -53,6 +53,8 @@ _SCHEMA = (
         title VARCHAR(300) NOT NULL,
         body TEXT NOT NULL,
         search_text TEXT NOT NULL,
+        acceptance TEXT NOT NULL,
+        invariants TEXT NOT NULL,
         scope VARCHAR(400) NOT NULL DEFAULT '',
         version INT NOT NULL DEFAULT 1,
         source_file VARCHAR(400) NOT NULL,
@@ -103,6 +105,30 @@ _SCHEMA = (
     )
     """,
 )
+
+
+def _spec_record(row: tuple[Any, ...]) -> dict[str, Any]:
+    """Turn a row of the specification table into a record.
+
+    Args:
+        row: The row of the table.
+
+    Returns:
+        The specification record.
+    """
+    return {
+        "spec_id": row[0],
+        "title": row[1],
+        "body": row[2],
+        "acceptance": row[3],
+        "invariants": row[4],
+        "scope": row[5],
+        "version": row[6],
+        "source_file": row[7],
+        "line_start": row[8],
+        "line_end": row[9],
+        "content_hash": row[10],
+    }
 
 
 class SeekDBStore:
@@ -210,6 +236,8 @@ class SeekDBStore:
         title: str,
         body: str,
         search_text: str,
+        acceptance: str,
+        invariants: str,
         scope: str,
         version: int,
         source_file: str,
@@ -225,6 +253,8 @@ class SeekDBStore:
             title: Human readable specification title.
             body: Requirement text of the specification.
             search_text: Text used by the full text index.
+            acceptance: Acceptance criteria of the specification.
+            invariants: Behaviour that must survive the change.
             scope: Source path the specification applies to.
             version: Revision number of the specification.
             source_file: File the specification was parsed from.
@@ -244,13 +274,15 @@ class SeekDBStore:
         self.execute(
             """
             INSERT INTO spec_items
-                (spec_id, title, body, search_text, scope, version, source_file,
-                 line_start, line_end, content_hash, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (spec_id, title, body, search_text, acceptance, invariants, scope,
+                 version, source_file, line_start, line_end, content_hash, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 title = VALUES(title),
                 body = VALUES(body),
                 search_text = VALUES(search_text),
+                acceptance = VALUES(acceptance),
+                invariants = VALUES(invariants),
                 scope = VALUES(scope),
                 version = VALUES(version),
                 source_file = VALUES(source_file),
@@ -264,6 +296,8 @@ class SeekDBStore:
                 title,
                 body,
                 search_text,
+                acceptance,
+                invariants,
                 scope,
                 version,
                 source_file,
@@ -360,24 +394,12 @@ class SeekDBStore:
         """Return every stored specification entry."""
         rows = self.query(
             """
-            SELECT spec_id, title, body, scope, version, source_file, line_start, line_end, content_hash
+            SELECT spec_id, title, body, acceptance, invariants, scope, version,
+                   source_file, line_start, line_end, content_hash
             FROM spec_items ORDER BY spec_id
             """
         )
-        return [
-            {
-                "spec_id": row[0],
-                "title": row[1],
-                "body": row[2],
-                "scope": row[3],
-                "version": row[4],
-                "source_file": row[5],
-                "line_start": row[6],
-                "line_end": row[7],
-                "content_hash": row[8],
-            }
-            for row in rows
-        ]
+        return [_spec_record(row) for row in rows]
 
     def spec_by_id(self, spec_id: str) -> dict[str, Any] | None:
         """Return one stored specification entry.
@@ -390,25 +412,15 @@ class SeekDBStore:
         """
         rows = self.query(
             """
-            SELECT spec_id, title, body, scope, version, source_file, line_start, line_end, content_hash
+            SELECT spec_id, title, body, acceptance, invariants, scope, version,
+                   source_file, line_start, line_end, content_hash
             FROM spec_items WHERE spec_id = %s
             """,
             (spec_id,),
         )
         if not rows:
             return None
-        row = rows[0]
-        return {
-            "spec_id": row[0],
-            "title": row[1],
-            "body": row[2],
-            "scope": row[3],
-            "version": row[4],
-            "source_file": row[5],
-            "line_start": row[6],
-            "line_end": row[7],
-            "content_hash": row[8],
-        }
+        return _spec_record(rows[0])
 
     def spec_versions(self, spec_id: str) -> list[dict[str, Any]]:
         """Return the recorded revisions of one specification.
