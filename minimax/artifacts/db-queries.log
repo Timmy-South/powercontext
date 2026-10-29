@@ -1,0 +1,67 @@
+seekDB query record
+==============================================================================
+database directory: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.sddctx-final2\seekdb
+
+-- import run history ------------------------------------------
+{"run_id": "0b1dca5ada09432d", "started_at": "2026-10-29T18:41:25+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "abd866009485d2c6", "started_at": "2026-10-29T18:41:20+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "45a0d0ae7f33298e", "started_at": "2026-10-29T18:39:29+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+
+-- stored specifications ---------------------------------------
+SPEC-FILTER-001 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-001.md:1 | hash=e35a4970054ff634
+SPEC-FILTER-002 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-002.md:1 | hash=e32d06c48abd670e
+SPEC-FILTER-003 v3 | scope=src/shop/filters.py | source=SPEC-FILTER-003.md:1 | hash=9bb4dd9396e2611f
+SPEC-PRICE-010 v1 | scope=src/shop/pricing.py | source=SPEC-PRICE-010.md:1 | hash=e25b0187b01e09d4
+
+-- revision history of the specifications ------------------------
+SPEC-FILTER-001 v1 captured=2026-10-29T18:39:29+00:00
+SPEC-FILTER-002 v1 captured=2026-10-29T18:39:29+00:00
+SPEC-FILTER-003 v1 captured=2026-10-29T18:39:29+00:00
+SPEC-FILTER-003 v2 captured=2026-10-29T18:41:20+00:00
+SPEC-FILTER-003 v3 captured=2026-10-29T18:41:25+00:00
+SPEC-PRICE-010 v1 captured=2026-10-29T18:39:29+00:00
+
+-- retrieval: full text match on the indexed specification text ---
+SQL   : SELECT spec_id, MATCH(search_text) AGAINST ('+customer_tiers +premium +gold +silver' IN BOOLEAN MODE)
+RESULT: spec_id=SPEC-FILTER-003 score=2.978752
+
+-- retrieval: natural language phrase match -----------------------
+SQL   : SELECT spec_id FROM spec_items WHERE body LIKE '%为订单筛选增加客户等级分组过滤%'
+SQL   : SELECT spec_id FROM spec_items WHERE body LIKE '%中的%'
+RESULT: spec_id=SPEC-FILTER-001
+SQL   : SELECT spec_id FROM spec_items WHERE body LIKE '%分组必须展开为%'
+
+-- retrieval: the code symbols of the selected scope ---------------
+specification SPEC-FILTER-003 declares scope src/shop/filters.py
+  symbol src/shop/filters.py::OrderCriteria lines 32-43 kind=class
+  symbol src/shop/filters.py::filter_orders lines 46-68 kind=function
+  test   tests/test_filters_regression.py::test_filter_by_status line 28
+  test   tests/test_filters_regression.py::test_filter_by_min_amount line 33
+  test   tests/test_filters_regression.py::test_filter_combines_status_and_min_amount line 38
+  test   tests/test_filters_regression.py::test_empty_criteria_returns_every_order line 46
+  test   tests/test_filters_regression.py::test_filter_preserves_input_order line 51
+  test   tests/test_filters_regression.py::test_filter_does_not_mutate_input line 56
+  test   tests/test_filters_regression.py::test_filter_by_exact_customer_tier line 62
+  test   tests/test_filters_regression.py::test_filter_by_exact_customer_tier_bronze line 67
+  test   tests/test_filters_tier_groups.py::test_premium_group_expands_to_gold_and_silver line 27
+  test   tests/test_filters_tier_groups.py::test_exact_tier_still_matches_precisely line 32
+  test   tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined line 37
+  test   tests/test_filters_tier_groups.py::test_empty_tier_set_does_not_filter_by_tier line 42
+specification SPEC-FILTER-001 declares scope src/shop/filters.py
+  symbol src/shop/filters.py::OrderCriteria lines 32-43 kind=class
+  symbol src/shop/filters.py::filter_orders lines 46-68 kind=function
+  test   tests/test_filters_regression.py::test_filter_by_status line 28
+  test   tests/test_filters_regression.py::test_filter_by_min_amount line 33
+  test   tests/test_filters_regression.py::test_filter_combines_status_and_min_amount line 38
+  test   tests/test_filters_regression.py::test_empty_criteria_returns_every_order line 46
+  test   tests/test_filters_regression.py::test_filter_preserves_input_order line 51
+  test   tests/test_filters_regression.py::test_filter_does_not_mutate_input line 56
+  test   tests/test_filters_regression.py::test_filter_by_exact_customer_tier line 62
+  test   tests/test_filters_regression.py::test_filter_by_exact_customer_tier_bronze line 67
+  test   tests/test_filters_tier_groups.py::test_premium_group_expands_to_gold_and_silver line 27
+  test   tests/test_filters_tier_groups.py::test_exact_tier_still_matches_precisely line 32
+  test   tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined line 37
+  test   tests/test_filters_tier_groups.py::test_empty_tier_set_does_not_filter_by_tier line 42
+
+-- assembled context ----------------------------------------------
+specifications=['SPEC-FILTER-003', 'SPEC-FILTER-001'] code=2 tests=12

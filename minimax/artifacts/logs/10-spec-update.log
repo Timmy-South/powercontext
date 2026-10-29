@@ -1,0 +1,5 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.venv\Scripts\python.exe C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\verify\apply_spec_update.py --apply
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
+# exit code: 0
+
+updated specification applied: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\specs\SPEC-FILTER-003.md now holds version 2

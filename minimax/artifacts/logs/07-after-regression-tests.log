@@ -1,0 +1,26 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe -m pytest -v tests/test_filters_regression.py tests/test_pricing.py
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+# exit code: 0
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.9, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+configfile: pyproject.toml
+collecting ... collected 13 items
+
+tests/test_filters_regression.py::test_filter_by_status PASSED           [  7%]
+tests/test_filters_regression.py::test_filter_by_min_amount PASSED       [ 15%]
+tests/test_filters_regression.py::test_filter_combines_status_and_min_amount PASSED [ 23%]
+tests/test_filters_regression.py::test_empty_criteria_returns_every_order PASSED [ 30%]
+tests/test_filters_regression.py::test_filter_preserves_input_order PASSED [ 38%]
+tests/test_filters_regression.py::test_filter_does_not_mutate_input PASSED [ 46%]
+tests/test_filters_regression.py::test_filter_by_exact_customer_tier PASSED [ 53%]
+tests/test_filters_regression.py::test_filter_by_exact_customer_tier_bronze PASSED [ 61%]
+tests/test_pricing.py::test_top_tier_discount PASSED                     [ 69%]
+tests/test_pricing.py::test_middle_tier_discount PASSED                  [ 76%]
+tests/test_pricing.py::test_below_tier_has_no_discount PASSED            [ 84%]
+tests/test_pricing.py::test_discount_never_exceeds_order_amount PASSED   [ 92%]
+tests/test_pricing.py::test_non_positive_amount_has_no_discount PASSED   [100%]
+
+============================= 13 passed in 0.03s ==============================

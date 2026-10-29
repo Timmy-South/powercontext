@@ -1,0 +1,17 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe -m pytest -v tests/test_filters_tier_groups.py
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+# exit code: 0
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.9, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+configfile: pyproject.toml
+collecting ... collected 4 items
+
+tests/test_filters_tier_groups.py::test_premium_group_expands_to_gold_and_silver PASSED [ 25%]
+tests/test_filters_tier_groups.py::test_exact_tier_still_matches_precisely PASSED [ 50%]
+tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined PASSED [ 75%]
+tests/test_filters_tier_groups.py::test_empty_tier_set_does_not_filter_by_tier PASSED [100%]
+
+============================== 4 passed in 0.02s ==============================

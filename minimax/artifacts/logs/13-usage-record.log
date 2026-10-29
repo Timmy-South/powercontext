@@ -1,0 +1,7 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.venv\Scripts\python.exe C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\verify\record_usage.py
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
+# exit code: 0
+
+database query record: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\artifacts\db-queries.log
+powercontext state record: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\artifacts\powercontext-state.md
+code snapshot written

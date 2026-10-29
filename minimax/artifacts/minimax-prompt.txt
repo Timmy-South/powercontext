@@ -1,0 +1,155 @@
+Task:
+为订单筛选增加客户等级分组过滤：customer_tiers 中的 premium 分组必须展开为 gold 与 silver
+
+Applicable specifications:
+[SPEC-FILTER-003] (version 1) 客户等级分组筛选
+Source: specs/SPEC-FILTER-003.md:1-31
+Requirement:
+`filter_orders` 的 `customer_tiers` 过滤必须同时支持具体等级和等级分组。
+
+具体等级直接按 `Order.customer_tier` 精确匹配。等级分组是等级集合的别名，在过滤前先展开为具体等级集合：
+
+| 分组 | 展开为 |
+| --- | --- |
+| `premium` | `gold`、`silver` |
+
+传入的具体等级与分组可以混合使用。只要订单的 `customer_tier` 命中展开后的任一等级，该订单即被保留。
+
+当 `customer_tiers` 为空集合时，不按客户等级过滤。
+[SPEC-FILTER-001] (version 1) 订单状态筛选
+Source: specs/SPEC-FILTER-001.md:1-20
+Requirement:
+`filter_orders` 必须支持按 `status` 过滤订单。传入的 `OrderCriteria.status` 集合中的状态才会被保留；
+当 `status` 为空集合时，不按状态过滤。
+
+Files that have to be changed:
+### src/shop/filters.py
+```python
+# Copyright (c) 2026 OceanBase.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Order filtering helpers."""
+
+from __future__ import annotations
+
+from collections.abc import Iterable
+from dataclasses import dataclass, field
+from decimal import Decimal
+
+from shop.models import Order
+
+
+@dataclass(frozen=True)
+class OrderCriteria:
+    """Filter criteria accepted by :func:`filter_orders`.
+
+    Attributes:
+        status: Keep only orders whose status is in this collection.
+        min_amount: Keep only orders whose amount is greater than or equal to it.
+        customer_tiers: Keep only orders whose customer tier is in this collection.
+    """
+
+    status: frozenset[str] = field(default_factory=frozenset)
+    min_amount: Decimal | None = None
+    customer_tiers: frozenset[str] = field(default_factory=frozenset)
+
+
+def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Order]:
+    """Return the orders that satisfy every configured criterion.
+
+    Args:
+        orders: Orders to filter.
+        criteria: Criteria that an order must satisfy.
+
+    Returns:
+        Matching orders in their original relative order.
+    """
+    result = list(orders)
+    if criteria.status:
+        result = [order for order in result if order.status in criteria.status]
+    if criteria.min_amount is not None:
+        result = [order for order in result if order.amount >= criteria.min_amount]
+    if criteria.customer_tiers:
+        result = [order for order in result if order.customer_tier in criteria.customer_tiers]
+    return result
+
+```
+
+Symbols that the specifications point at:
+- src/shop/filters.py:27-38 class OrderCriteria
+- src/shop/filters.py:41-58 function filter_orders
+
+Tests that verify the specifications:
+- tests/test_filters_regression.py:28 test_filter_by_status (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:33 test_filter_by_min_amount (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:38 test_filter_combines_status_and_min_amount (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:46 test_empty_criteria_returns_every_order (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:51 test_filter_preserves_input_order (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:56 test_filter_does_not_mutate_input (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:62 test_filter_by_exact_customer_tier (required by SPEC-FILTER-003)
+- tests/test_filters_regression.py:67 test_filter_by_exact_customer_tier_bronze (required by SPEC-FILTER-003)
+- tests/test_filters_tier_groups.py:27 test_premium_group_expands_to_gold_and_silver (required by SPEC-FILTER-003)
+- tests/test_filters_tier_groups.py:32 test_exact_tier_still_matches_precisely (required by SPEC-FILTER-003)
+- tests/test_filters_tier_groups.py:37 test_group_and_exact_tier_can_be_combined (required by SPEC-FILTER-003)
+- tests/test_filters_tier_groups.py:42 test_empty_tier_set_does_not_filter_by_tier (required by SPEC-FILTER-003)
+
+Task state reused from an earlier run:
+{
+  "task_id": "task-filter-003",
+  "objective": "为订单筛选增加客户等级分组过滤：customer_tiers 中的 premium 分组必须展开为 gold 与 silver",
+  "scope_id": "scp_1x1gtygc2phnst7463w0h0pmnx",
+  "facts": [
+    "SPEC-FILTER-003 applies to src/shop/filters.py",
+    "SPEC-FILTER-001 applies to src/shop/filters.py"
+  ],
+  "in_scope": [
+    "src/shop/filters.py"
+  ],
+  "exclusions": [
+    "SPEC-FILTER-003 keeps 客户等级分组筛选 unchanged",
+    "SPEC-FILTER-001 keeps 订单状态筛选 unchanged"
+  ],
+  "completion_criteria": [
+    "The target tests of the specification pass.",
+    "The regression tests of the project still pass."
+  ],
+  "done": [
+    "changed src/shop/filters.py",
+    "ran 1 test selection(s)"
+  ],
+  "remaining": [],
+  "checks": [
+    {
+      "name": "tests/test_filters_tier_groups.py",
+      "status": "passed",
+      "details": "C:\\Users\\21141\\.minimax\\sessions\\mvs_b854da07d3734b80ab590198c04474a7\\workspace\\build\\minimax\\demo_shop\\.venv\\Scripts\\python.exe -m pytest -q tests/test_filters_tier_groups.py",
+      "passed": true
+    }
+  ],
+  "artifacts": [],
+  "updated_at": "2026-10-29T18:39:34+00:00",
+  "source_ids": {
+    "contract": "sddctx-contract:task-filter-003",
+    "outcome": "sddctx-outcome:task-filter-003"
+  }
+}
+
+Implement the task. Return one unified diff that changes the code so that the
+specifications are satisfied and the listed behaviour stays unchanged.
+
+Rules for the diff:
+- Use the exact line numbers and the exact context lines of the file above.
+- Keep every line of the file that does not have to change unchanged, also
+  the blank lines and the license header.
+- Change only the files listed above.

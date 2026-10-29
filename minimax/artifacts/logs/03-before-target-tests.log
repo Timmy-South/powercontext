@@ -1,0 +1,59 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe -m pytest -v tests/test_filters_tier_groups.py
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+# exit code: 1
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.9, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop
+configfile: pyproject.toml
+collecting ... collected 4 items
+
+tests/test_filters_tier_groups.py::test_premium_group_expands_to_gold_and_silver FAILED [ 25%]
+tests/test_filters_tier_groups.py::test_exact_tier_still_matches_precisely PASSED [ 50%]
+tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined FAILED [ 75%]
+tests/test_filters_tier_groups.py::test_empty_tier_set_does_not_filter_by_tier PASSED [100%]
+
+================================== FAILURES ===================================
+________________ test_premium_group_expands_to_gold_and_silver ________________
+
+orders = [Order(order_id='o-1', customer_id='c-1', status='paid', amount=Decimal('120.00'), placed_on=datetime.date(2026, 3, 1)...omer_id='c-5', status='cancelled', amount=Decimal('35.00'), placed_on=datetime.date(2026, 3, 5), customer_tier='gold')]
+
+    def test_premium_group_expands_to_gold_and_silver(orders) -> None:
+        result = filter_orders(orders, OrderCriteria(customer_tiers=frozenset({"premium"})))
+>       assert [order.order_id for order in result] == ["o-1", "o-2", "o-5"]
+E       AssertionError: assert [] == ['o-1', 'o-2', 'o-5']
+E         
+E         Right contains 3 more items, first extra item: 'o-1'
+E         
+E         Full diff: (-: missing in left side, +: extra in left side)
+E         + []
+E         - [
+E         -     'o-1',...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+tests\test_filters_tier_groups.py:29: AssertionError
+__________________ test_group_and_exact_tier_can_be_combined __________________
+
+orders = [Order(order_id='o-1', customer_id='c-1', status='paid', amount=Decimal('120.00'), placed_on=datetime.date(2026, 3, 1)...omer_id='c-5', status='cancelled', amount=Decimal('35.00'), placed_on=datetime.date(2026, 3, 5), customer_tier='gold')]
+
+    def test_group_and_exact_tier_can_be_combined(orders) -> None:
+        result = filter_orders(orders, OrderCriteria(customer_tiers=frozenset({"premium", "bronze"})))
+>       assert [order.order_id for order in result] == ["o-1", "o-2", "o-4", "o-5"]
+E       AssertionError: assert ['o-4'] == ['o-1', 'o-2', 'o-4', 'o-5']
+E         
+E         At index 0 diff: 'o-4' != 'o-1'
+E         Right contains 3 more items, first extra item: 'o-2'
+E         
+E         Full diff: (-: missing in left side, +: extra in left side)
+E           [
+E         -     'o-1',...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+tests\test_filters_tier_groups.py:39: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_filters_tier_groups.py::test_premium_group_expands_to_gold_and_silver
+FAILED tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined
+========================= 2 failed, 2 passed in 0.12s =========================

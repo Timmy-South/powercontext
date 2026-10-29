@@ -1,0 +1,43 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.venv\Scripts\python.exe -m sddctx state show --task-id task-filter-003
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
+# exit code: 0
+
+{
+  "task_id": "task-filter-003",
+  "objective": "为订单筛选增加客户等级分组过滤：customer_tiers 中的 premium 分组必须展开为 gold 与 silver",
+  "scope_id": "scp_1x1gtygc2phnst7463w0h0pmnx",
+  "facts": [
+    "SPEC-FILTER-003 applies to src/shop/filters.py",
+    "SPEC-FILTER-001 applies to src/shop/filters.py"
+  ],
+  "in_scope": [
+    "src/shop/filters.py"
+  ],
+  "exclusions": [
+    "SPEC-FILTER-003 keeps 客户等级分组筛选 unchanged",
+    "SPEC-FILTER-001 keeps 订单状态筛选 unchanged"
+  ],
+  "completion_criteria": [
+    "The target tests of the specification pass.",
+    "The regression tests of the project still pass."
+  ],
+  "done": [
+    "changed src/shop/filters.py",
+    "ran 1 test selection(s)"
+  ],
+  "remaining": [],
+  "checks": [
+    {
+      "name": "tests/test_filters_tier_groups.py",
+      "status": "passed",
+      "details": "C:\\Users\\21141\\.minimax\\sessions\\mvs_b854da07d3734b80ab590198c04474a7\\workspace\\build\\minimax\\demo_shop\\.venv\\Scripts\\python.exe -m pytest -q tests/test_filters_tier_groups.py",
+      "passed": true
+    }
+  ],
+  "artifacts": [],
+  "updated_at": "2026-10-29T18:41:15+00:00",
+  "source_ids": {
+    "contract": "sddctx-contract:task-filter-003",
+    "outcome": "sddctx-outcome:task-filter-003"
+  }
+}

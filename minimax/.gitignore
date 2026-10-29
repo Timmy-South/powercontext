@@ -1,0 +1,13 @@
+# Runtime state of the context module.
+.sddctx/
+.venv/
+demo_shop/.venv/
+
+# Backup that the specification update helper writes while an update is active.
+artifacts/SPEC-FILTER-003.baseline.md
+
+# Python bytecode.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/

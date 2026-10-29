@@ -1,0 +1,7 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.venv\Scripts\python.exe -m sddctx apply --task 为订单筛选增加客户等级分组过滤：customer_tiers 中的 premium 分组必须展开为 gold 与 silver --task-id task-filter-003 --project C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop --python C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\demo_shop\.venv\Scripts\python.exe --tests tests/test_filters_tier_groups.py --record C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\artifacts\minimax-record.json --diff-output C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\artifacts\applied.patch --prompt-output C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\artifacts\minimax-prompt.txt
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
+# exit code: 0
+
+Task state written to PowerContext scope scp_1x1gtygc2phnst7463w0h0pmnx
+Changed files: src/shop/filters.py
+pytest -q tests/test_filters_tier_groups.py -> exit 0

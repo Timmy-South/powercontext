@@ -1,0 +1,20 @@
+$ C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.venv\Scripts\python.exe -m sddctx import
+# cwd: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax
+# exit code: 0
+
+{
+  "run_id": "abd866009485d2c6",
+  "started_at": "2026-10-29T18:41:20+00:00",
+  "spec_count": 4,
+  "code_symbol_count": 23,
+  "test_count": 17,
+  "changed_specs": [
+    "SPEC-FILTER-003"
+  ],
+  "specs": [
+    "SPEC-FILTER-001",
+    "SPEC-FILTER-002",
+    "SPEC-FILTER-003",
+    "SPEC-PRICE-010"
+  ]
+}
