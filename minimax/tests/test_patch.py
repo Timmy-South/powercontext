@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import pytest
-
 from sddctx.patch import (
     PatchError,
     apply_hunks,

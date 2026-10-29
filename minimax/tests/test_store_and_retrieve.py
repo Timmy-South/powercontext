@@ -24,7 +24,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from sddctx.ingest import import_materials
 from sddctx.retrieve import build_context, extract_query_terms, select_specs
 from sddctx.store import SeekDBStore

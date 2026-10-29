@@ -37,7 +37,7 @@ import json
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 #: Source type used for the work contract of a task.
@@ -297,9 +297,7 @@ class PowerContextClient:
             "schema": "powercontext.work-contract.v1",
             "trust": "untrusted_input",
             "objective": state.objective,
-            "facts": [
-                {"text": fact, "basis": "declared", "evidence": []} for fact in state.facts
-            ],
+            "facts": [{"text": fact, "basis": "declared", "evidence": []} for fact in state.facts],
             "in_scope": list(state.in_scope),
             "exclusions": list(state.exclusions),
             "completion_criteria": list(state.completion_criteria),
@@ -330,9 +328,7 @@ class PowerContextClient:
             "objective": state.objective,
             "status": "succeeded" if not state.remaining else "partial",
             "summary": f"{len(state.done)} items done, {len(state.remaining)} items remaining.",
-            "observations": [
-                {"text": item, "basis": "declared", "evidence": []} for item in state.done
-            ],
+            "observations": [{"text": item, "basis": "declared", "evidence": []} for item in state.done],
             "checks": [
                 {
                     "name": str(check.get("name", check.get("command", "check"))),
@@ -399,7 +395,9 @@ class PowerContextClient:
             content = _as_dict(contract.get("content"))
             if content:
                 state.objective = str(content.get("objective", ""))
-                state.facts = [str(claim.get("text", "")) for claim in content.get("facts", []) if isinstance(claim, dict)]
+                state.facts = [
+                    str(claim.get("text", "")) for claim in content.get("facts", []) if isinstance(claim, dict)
+                ]
                 state.in_scope = list(content.get("in_scope", []))
                 state.exclusions = list(content.get("exclusions", []))
                 state.completion_criteria = list(content.get("completion_criteria", []))
@@ -410,7 +408,9 @@ class PowerContextClient:
             content = _as_dict(outcome.get("content"))
             if content:
                 state.objective = state.objective or str(content.get("objective", ""))
-                state.done = [str(claim.get("text", "")) for claim in content.get("observations", []) if isinstance(claim, dict)]
+                state.done = [
+                    str(claim.get("text", "")) for claim in content.get("observations", []) if isinstance(claim, dict)
+                ]
                 state.checks = [
                     {
                         "name": str(check.get("name", "")),
@@ -425,7 +425,7 @@ class PowerContextClient:
                 state.remaining = list(content.get("remaining_work", []))
             state.source_ids["outcome"] = outcome_id
 
-        state.updated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        state.updated_at = datetime.now(UTC).isoformat(timespec="seconds")
         return state
 
     def search_memory(self, query: str, limit: int = 10) -> list[dict[str, Any]]:

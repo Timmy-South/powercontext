@@ -23,11 +23,6 @@ from decimal import Decimal
 from shop.models import Order
 
 
-_CUSTOMER_TIER_GROUPS = {
-    "premium": frozenset({"gold", "silver"}),
-}
-
-
 @dataclass(frozen=True)
 class OrderCriteria:
     """Filter criteria accepted by :func:`filter_orders`.
@@ -60,9 +55,8 @@ def filter_orders(orders: Iterable[Order], criteria: OrderCriteria) -> list[Orde
         result = [order for order in result if order.amount >= criteria.min_amount]
     if criteria.customer_tiers:
         customer_tiers = set(criteria.customer_tiers)
-        for group, expanded_tiers in _CUSTOMER_TIER_GROUPS.items():
-            if group in customer_tiers:
-                customer_tiers.remove(group)
-                customer_tiers.update(expanded_tiers)
+        if "premium" in customer_tiers:
+            customer_tiers.remove("premium")
+            customer_tiers.update(("gold", "silver"))
         result = [order for order in result if order.customer_tier in customer_tiers]
     return result

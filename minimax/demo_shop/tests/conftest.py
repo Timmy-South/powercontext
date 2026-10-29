@@ -20,7 +20,6 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-
 from shop.models import Order
 
 ORDERS = [

@@ -228,6 +228,8 @@ def command_apply(settings: Settings, args: argparse.Namespace) -> int:
         relative = path.relative_to(project_dir).as_posix()
         changed_files.append(relative)
 
+    after = snapshot_files(project_dir, changed_files)
+
     runs: list[Any] = []
     selections = args.tests or list(DEFAULT_TEST_SELECTIONS)
     for selection in selections:
@@ -240,12 +242,14 @@ def command_apply(settings: Settings, args: argparse.Namespace) -> int:
             "exit_code": run.exit_code,
             "passed": run.exit_code == 0,
         }
-        for selection, run in zip(selections, runs)
+        for selection, run in zip(selections, runs, strict=False)
     ]
     all_passed = all(run.exit_code == 0 for run in runs)
     changed_labels = [f"changed {relative}" for relative in changed_files]
     done = [*changed_labels, f"ran {len(runs)} test selection(s)"]
-    remaining = [] if all_passed else [f"test selection failed: {run.command[-1]}" for run in runs if run.exit_code != 0]
+    remaining = (
+        [] if all_passed else [f"test selection failed: {run.command[-1]}" for run in runs if run.exit_code != 0]
+    )
 
     new_state = build_state(
         task_id=args.task_id,
@@ -279,6 +283,8 @@ def command_apply(settings: Settings, args: argparse.Namespace) -> int:
         response=response,
         diff=diff,
         changed_files=changed_files,
+        before=before,
+        after=after,
         test_runs=runs,
         state=new_state,
     )

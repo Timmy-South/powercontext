@@ -153,11 +153,7 @@ def extract_query_terms(task: str) -> tuple[list[str], list[str]]:
     Returns:
         A tuple of ASCII identifiers and CJK phrases.
     """
-    identifiers = [
-        token.lower()
-        for token in _IDENTIFIER_RE.findall(task)
-        if token.lower() not in _STOPWORDS
-    ]
+    identifiers = [token.lower() for token in _IDENTIFIER_RE.findall(task) if token.lower() not in _STOPWORDS]
     phrases = list(dict.fromkeys(_CJK_RE.findall(task)))
     return identifiers, phrases
 

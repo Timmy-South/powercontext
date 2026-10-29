@@ -35,10 +35,8 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -84,12 +82,16 @@ def run(command: list[str], cwd: Path, log_name: str | None = None) -> int:
     printable = " ".join(command)
     print(f"$ {printable}")
     print(f"  cwd: {cwd}")
+    environment = dict(os.environ)
+    existing = environment.get("PYTHONPATH", "")
+    environment["PYTHONPATH"] = str(ROOT) + (os.pathsep + existing if existing else "")
     completed = subprocess.run(  # noqa: S603
         command,
         cwd=cwd,
         capture_output=True,
         text=True,
         check=False,
+        env=environment,
     )
     output = (completed.stdout or "") + (completed.stderr or "")
     print(f"  exit code: {completed.returncode}")
@@ -121,7 +123,12 @@ def project_python() -> str:
     Returns:
         Path of the interpreter.
     """
-    return str(ROOT / "demo_shop" / ".venv" / "Scripts" / "python.exe")
+    venv = ROOT / "demo_shop" / ".venv"
+    if os.name == "nt":
+        candidate = venv / "Scripts" / "python.exe"
+    else:
+        candidate = venv / "bin" / "python"
+    return str(candidate) if candidate.exists() else sys.executable
 
 
 def main() -> int:

@@ -1,11 +1,11 @@
 seekDB query record
 ==============================================================================
-database directory: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.sddctx-final2\seekdb
+database directory: C:\Users\21141\.minimax\sessions\mvs_b854da07d3734b80ab590198c04474a7\workspace\build\minimax\.sddctx-run\seekdb
 
 -- import run history ------------------------------------------
-{"run_id": "0b1dca5ada09432d", "started_at": "2026-10-29T18:41:25+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
-{"run_id": "abd866009485d2c6", "started_at": "2026-10-29T18:41:20+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
-{"run_id": "45a0d0ae7f33298e", "started_at": "2026-10-29T18:39:29+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "52739d1b1b4aaebf", "started_at": "2026-10-29T18:51:11+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "15ac4af471eb6120", "started_at": "2026-10-29T18:51:06+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
+{"run_id": "895e553ec1d1ba15", "started_at": "2026-10-29T18:50:39+00:00", "spec_count": 4, "code_count": 23, "test_count": 17}
 
 -- stored specifications ---------------------------------------
 SPEC-FILTER-001 v1 | scope=src/shop/filters.py | source=SPEC-FILTER-001.md:1 | hash=e35a4970054ff634
@@ -14,12 +14,12 @@ SPEC-FILTER-003 v3 | scope=src/shop/filters.py | source=SPEC-FILTER-003.md:1 | h
 SPEC-PRICE-010 v1 | scope=src/shop/pricing.py | source=SPEC-PRICE-010.md:1 | hash=e25b0187b01e09d4
 
 -- revision history of the specifications ------------------------
-SPEC-FILTER-001 v1 captured=2026-10-29T18:39:29+00:00
-SPEC-FILTER-002 v1 captured=2026-10-29T18:39:29+00:00
-SPEC-FILTER-003 v1 captured=2026-10-29T18:39:29+00:00
-SPEC-FILTER-003 v2 captured=2026-10-29T18:41:20+00:00
-SPEC-FILTER-003 v3 captured=2026-10-29T18:41:25+00:00
-SPEC-PRICE-010 v1 captured=2026-10-29T18:39:29+00:00
+SPEC-FILTER-001 v1 captured=2026-10-29T18:50:39+00:00
+SPEC-FILTER-002 v1 captured=2026-10-29T18:50:39+00:00
+SPEC-FILTER-003 v1 captured=2026-10-29T18:50:39+00:00
+SPEC-FILTER-003 v2 captured=2026-10-29T18:51:06+00:00
+SPEC-FILTER-003 v3 captured=2026-10-29T18:51:11+00:00
+SPEC-PRICE-010 v1 captured=2026-10-29T18:50:39+00:00
 
 -- retrieval: full text match on the indexed specification text ---
 SQL   : SELECT spec_id, MATCH(search_text) AGAINST ('+customer_tiers +premium +gold +silver' IN BOOLEAN MODE)
@@ -33,8 +33,8 @@ SQL   : SELECT spec_id FROM spec_items WHERE body LIKE '%分组必须展开为%'
 
 -- retrieval: the code symbols of the selected scope ---------------
 specification SPEC-FILTER-003 declares scope src/shop/filters.py
-  symbol src/shop/filters.py::OrderCriteria lines 32-43 kind=class
-  symbol src/shop/filters.py::filter_orders lines 46-68 kind=function
+  symbol src/shop/filters.py::OrderCriteria lines 27-38 kind=class
+  symbol src/shop/filters.py::filter_orders lines 41-62 kind=function
   test   tests/test_filters_regression.py::test_filter_by_status line 28
   test   tests/test_filters_regression.py::test_filter_by_min_amount line 33
   test   tests/test_filters_regression.py::test_filter_combines_status_and_min_amount line 38
@@ -48,8 +48,8 @@ specification SPEC-FILTER-003 declares scope src/shop/filters.py
   test   tests/test_filters_tier_groups.py::test_group_and_exact_tier_can_be_combined line 37
   test   tests/test_filters_tier_groups.py::test_empty_tier_set_does_not_filter_by_tier line 42
 specification SPEC-FILTER-001 declares scope src/shop/filters.py
-  symbol src/shop/filters.py::OrderCriteria lines 32-43 kind=class
-  symbol src/shop/filters.py::filter_orders lines 46-68 kind=function
+  symbol src/shop/filters.py::OrderCriteria lines 27-38 kind=class
+  symbol src/shop/filters.py::filter_orders lines 41-62 kind=function
   test   tests/test_filters_regression.py::test_filter_by_status line 28
   test   tests/test_filters_regression.py::test_filter_by_min_amount line 33
   test   tests/test_filters_regression.py::test_filter_combines_status_and_min_amount line 38

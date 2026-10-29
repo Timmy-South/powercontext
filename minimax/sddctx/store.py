@@ -138,9 +138,7 @@ class SeekDBStore:
             charset="utf8mb4",
         )
         with self.cursor() as cursor:
-            cursor.execute(
-                f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME} DEFAULT CHARACTER SET utf8mb4"
-            )
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME} DEFAULT CHARACTER SET utf8mb4")
             cursor.execute(f"USE {DATABASE_NAME}")
             for statement in _SCHEMA:
                 cursor.execute(statement)
@@ -333,7 +331,9 @@ class SeekDBStore:
                 ),
             )
 
-    def record_import_run(self, run_id: str, started_at: str, spec_count: int, code_count: int, test_count: int) -> None:
+    def record_import_run(
+        self, run_id: str, started_at: str, spec_count: int, code_count: int, test_count: int
+    ) -> None:
         """Record one import run for auditing.
 
         Args:
@@ -426,10 +426,7 @@ class SeekDBStore:
             """,
             (spec_id,),
         )
-        return [
-            {"version": row[0], "content_hash": row[1], "title": row[2], "captured_at": row[3]}
-            for row in rows
-        ]
+        return [{"version": row[0], "content_hash": row[1], "title": row[2], "captured_at": row[3]} for row in rows]
 
     def symbols_in_scope(self, scope: str) -> list[dict[str, Any]]:
         """Return the code symbols that live in a source path.
@@ -485,10 +482,7 @@ class SeekDBStore:
             """,
             params,
         )
-        return [
-            {"test_id": row[0], "file_path": row[1], "name": row[2], "line_start": row[3]}
-            for row in rows
-        ]
+        return [{"test_id": row[0], "file_path": row[1], "name": row[2], "line_start": row[3]} for row in rows]
 
     def all_code_symbols(self) -> list[dict[str, Any]]:
         """Return every stored code symbol."""
@@ -514,10 +508,7 @@ class SeekDBStore:
     def all_test_cases(self) -> list[dict[str, Any]]:
         """Return every stored test case."""
         rows = self.query("SELECT test_id, file_path, name, line_start FROM test_cases ORDER BY file_path, line_start")
-        return [
-            {"test_id": row[0], "file_path": row[1], "name": row[2], "line_start": row[3]}
-            for row in rows
-        ]
+        return [{"test_id": row[0], "file_path": row[1], "name": row[2], "line_start": row[3]} for row in rows]
 
     def import_runs(self) -> list[dict[str, Any]]:
         """Return the recorded import runs, newest first."""

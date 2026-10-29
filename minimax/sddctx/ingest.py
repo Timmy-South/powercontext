@@ -37,7 +37,7 @@ import ast
 import hashlib
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -286,7 +286,7 @@ def import_materials(
     Returns:
         Summary of the import, including the specifications that changed.
     """
-    started_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    started_at = datetime.now(UTC).isoformat(timespec="seconds")
     specs: list[ParsedSpec] = []
     for path in sorted(specs_dir.glob("*.md")):
         parsed = parse_spec_file(path)

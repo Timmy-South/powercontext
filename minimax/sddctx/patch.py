@@ -180,7 +180,9 @@ def _matches(original: list[str], start: int, expected: list[str]) -> bool:
     """
     if start < 0 or start + len(expected) > len(original):
         return False
-    return all(original[start + offset].rstrip("\n") == expected[offset].rstrip("\n") for offset in range(len(expected)))
+    return all(
+        original[start + offset].rstrip("\n") == expected[offset].rstrip("\n") for offset in range(len(expected))
+    )
 
 
 def _locate(original: list[str], hunk: Hunk, window: int = 40) -> int:
@@ -211,9 +213,7 @@ def _locate(original: list[str], hunk: Hunk, window: int = 40) -> int:
         for candidate in (hint - distance, hint + distance):
             if _matches(original, candidate, expected):
                 return candidate
-    raise PatchError(
-        f"the hunk that starts at line {hunk.old_start} does not match the file content"
-    )
+    raise PatchError(f"the hunk that starts at line {hunk.old_start} does not match the file content")
 
 
 def apply_hunks(original: list[str], hunks: list[Hunk], path: str) -> list[str]:

@@ -29,17 +29,14 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sddctx.minimax_client import MiniMaxClient, MiniMaxResponse
-from sddctx.patch import apply_unified_diff, extract_diff, make_unified_diff
-from sddctx.retrieve import TaskContext, build_context
-from sddctx.state import PowerContextClient, TaskState
-from sddctx.store import SeekDBStore
+from sddctx.minimax_client import MiniMaxResponse
+from sddctx.retrieve import TaskContext
+from sddctx.state import TaskState
 
 #: Prompt that tells MiniMax how to answer.
 SYSTEM_PROMPT = """\
@@ -124,6 +121,8 @@ class TaskResult:
         response: The answer MiniMax returned.
         diff: The unified diff of the change.
         changed_files: Files the diff changed.
+        before: Content of the changed files before the change.
+        after: Content of the changed files after the change.
         test_runs: Test executions of the run.
         state: The state that was written into PowerContext.
         artifacts: Files that the run produced.
@@ -134,6 +133,8 @@ class TaskResult:
     response: MiniMaxResponse | None = None
     diff: str = ""
     changed_files: list[str] = field(default_factory=list)
+    before: dict[str, str] = field(default_factory=dict)
+    after: dict[str, str] = field(default_factory=dict)
     test_runs: list[TestRun] = field(default_factory=list)
     state: TaskState | None = None
     artifacts: list[str] = field(default_factory=list)
@@ -157,6 +158,8 @@ class TaskResult:
             else None,
             "diff": self.diff,
             "changed_files": list(self.changed_files),
+            "before": dict(self.before),
+            "after": dict(self.after),
             "test_runs": [run.to_dict() for run in self.test_runs],
             "state": self.state.to_dict() if self.state else None,
             "artifacts": list(self.artifacts),
@@ -172,27 +175,36 @@ def format_prompt(context: TaskContext) -> str:
     Returns:
         The prompt text.
     """
-    specs = "\n".join(
-        f"[{spec.spec_id}] (version {spec.version}) {spec.title}\n"
-        f"Source: {spec.source_file}:{spec.line_start}-{spec.line_end}\n"
-        f"Requirement:\n{spec.body}"
-        for spec in context.specs
-    ) or "(none matched)"
+    specs = (
+        "\n".join(
+            f"[{spec.spec_id}] (version {spec.version}) {spec.title}\n"
+            f"Source: {spec.source_file}:{spec.line_start}-{spec.line_end}\n"
+            f"Requirement:\n{spec.body}"
+            for spec in context.specs
+        )
+        or "(none matched)"
+    )
 
-    files = "\n".join(
-        f"### {entry['file_path']}\n```python\n{entry.get('content', '')}\n```"
-        for entry in context.files
-    ) or "(none matched)"
+    files = (
+        "\n".join(f"### {entry['file_path']}\n```python\n{entry.get('content', '')}\n```" for entry in context.files)
+        or "(none matched)"
+    )
 
-    code = "\n".join(
-        f"- {item['file_path']}:{item['line_start']}-{item['line_end']} {item['kind']} {item['name']}"
-        for item in context.code
-    ) or "(none matched)"
+    code = (
+        "\n".join(
+            f"- {item['file_path']}:{item['line_start']}-{item['line_end']} {item['kind']} {item['name']}"
+            for item in context.code
+        )
+        or "(none matched)"
+    )
 
-    tests = "\n".join(
-        f"- {item['file_path']}:{item['line_start']} {item['name']} (required by {item.get('required_by', '')})"
-        for item in context.tests
-    ) or "(none matched)"
+    tests = (
+        "\n".join(
+            f"- {item['file_path']}:{item['line_start']} {item['name']} (required by {item.get('required_by', '')})"
+            for item in context.tests
+        )
+        or "(none matched)"
+    )
 
     state = json.dumps(context.state, ensure_ascii=False, indent=2) if context.state else "(no state yet)"
     return PROMPT_TEMPLATE.format(
@@ -217,7 +229,7 @@ def run_tests(project_dir: Path, python: str, target: list[str]) -> TestRun:
         The result of the run.
     """
     command = [python, "-m", "pytest", "-q", *target]
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     completed = subprocess.run(  # noqa: S603
         command,
         cwd=project_dir,
@@ -225,7 +237,7 @@ def run_tests(project_dir: Path, python: str, target: list[str]) -> TestRun:
         text=True,
         check=False,
     )
-    ended = datetime.now(timezone.utc)
+    ended = datetime.now(UTC)
     return TestRun(
         command=command,
         exit_code=completed.returncode,
@@ -282,14 +294,9 @@ def build_state(
         task_id=task_id,
         objective=objective,
         scope_id=scope_id,
-        facts=[
-            f"{spec.spec_id} applies to {spec.scope}" for spec in context.specs
-        ],
+        facts=[f"{spec.spec_id} applies to {spec.scope}" for spec in context.specs],
         in_scope=sorted({spec.scope for spec in context.specs if spec.scope}),
-        exclusions=[
-            f"{spec.spec_id} keeps {spec.title} unchanged"
-            for spec in context.specs
-        ],
+        exclusions=[f"{spec.spec_id} keeps {spec.title} unchanged" for spec in context.specs],
         completion_criteria=[
             "The target tests of the specification pass.",
             "The regression tests of the project still pass.",
@@ -298,5 +305,5 @@ def build_state(
         remaining=remaining,
         checks=checks,
         artifacts=artifacts,
-        updated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        updated_at=datetime.now(UTC).isoformat(timespec="seconds"),
     )
