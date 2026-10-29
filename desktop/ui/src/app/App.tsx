@@ -25,6 +25,8 @@ import memoryIcon from "../assets/memory.svg";
 import settingsIcon from "../assets/settings.svg";
 import observationIcon from "../assets/retrieval.svg";
 
+import { useLocalServer } from "./useLocalServer";
+import { opsApi } from "../shared/ops";
 import { TopBar } from "./TopBar";
 import { Overview } from "./Overview";
 import { MemoryWorkspace } from "./MemoryWorkspace";
@@ -43,6 +45,8 @@ import { useConfirmation } from "./useConfirmation";
 type Page = "home" | "connections" | "memories" | "observation" | "settings";
 type Theme = "light" | "dark" | "system";
 export function App() {
+  const localServer = useLocalServer();
+  const [connectingLocal, setConnectingLocal] = useState(false);
   const [language, setLanguage] = useState<Language>("zh");
   const [theme, setTheme] = useState<Theme>("system");
   const [page, setPage] = useState<Page>("home");
@@ -73,10 +77,12 @@ export function App() {
     // Pending operations may finish after their editor has unmounted.
     setPendingConnections((current) => current + (pending ? 1 : -1));
   }
+  const acceptedGeneration = useRef(-1);
   function receiveState(next: DesktopState) {
-    setDesktop((current) =>
-      !current || next.generation >= current.generation ? next : current,
-    );
+    if (next.generation < acceptedGeneration.current) return false;
+    acceptedGeneration.current = next.generation;
+    setDesktop(next);
+    return true;
   }
   const { confirm, confirmation } = useConfirmation(language);
   function confirmSwitch() {
@@ -167,6 +173,11 @@ export function App() {
       );
     } catch (e) {
       setNativeError(e);
+      try {
+        receiveState(await desktopApi.state());
+      } catch {
+        /* Preserve the original check failure. */
+      }
     } finally {
       connectionPending(false);
       setRefreshing(false);
@@ -308,6 +319,17 @@ export function App() {
               </span>
             </div>
           )}
+          {page === "home" && !desktop?.active && (
+            <div className="actions">
+              <button
+                onClick={() =>
+                  navigate("settings", { section: "local-server" })
+                }
+              >
+                {t.setUpLocally}
+              </button>
+            </div>
+          )}
           {page === "home" && (
             <Overview
               state={desktop}
@@ -378,6 +400,56 @@ export function App() {
                 </div>
               </section>
               <LocalServerSettings
+                controller={localServer}
+                connecting={connectingLocal}
+                connectionAvailable={
+                  !!desktop && !stateLoading && !contextPending
+                }
+                onBeforeApply={async (plan) => {
+                  if (
+                    activeProfile &&
+                    plan.target.endpoint &&
+                    new URL(activeProfile.endpoint).origin ===
+                      new URL(plan.target.endpoint).origin
+                  ) {
+                    if (!(await confirmSwitch())) return false;
+                    try {
+                      receiveState(
+                        await desktopApi.invalidate(activeProfile.id),
+                      );
+                      setDirty(false);
+                    } catch (error) {
+                      setNativeError(error);
+                      return false;
+                    }
+                  }
+                  return true;
+                }}
+                onConnect={async () => {
+                  if (!desktop || connectingLocal || !(await confirmSwitch()))
+                    return;
+                  setConnectingLocal(true);
+                  connectionPending(true);
+                  setNativeError(null);
+                  try {
+                    const next = await opsApi.connect(desktop.generation);
+                    const accepted = receiveState(next);
+                    if (accepted && next.active?.scope) {
+                      setDirty(false);
+                      setPage("memories");
+                    }
+                  } catch (error) {
+                    setNativeError(error);
+                    try {
+                      receiveState(await desktopApi.state());
+                    } catch {
+                      /* Keep the connection error visible. */
+                    }
+                  } finally {
+                    setConnectingLocal(false);
+                    connectionPending(false);
+                  }
+                }}
                 language={language}
                 headingRef={localServerHeading}
                 onManageConnections={() => navigate("connections")}
